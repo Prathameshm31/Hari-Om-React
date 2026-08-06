@@ -10,12 +10,14 @@ import {
   X,
   UserRound,
   ShoppingBag,
+  Gift,
 } from 'lucide-react';
 import Button from './Button';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/' },
   { key: 'orders', label: 'My Orders', icon: ShoppingBag, to: '/orders' },
+  { key: 'rewards', label: 'My Rewards', icon: Gift, to: '/my-rewards' },
   { key: 'account', label: 'My Account', icon: Store, to: '/my-account' },
 ];
 

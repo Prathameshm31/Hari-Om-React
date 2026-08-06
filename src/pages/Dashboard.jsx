@@ -5,6 +5,7 @@ import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCi
 import UserLayout from '../components/UserLayout';
 import * as SELF from '../api/self';
 import { fetchMyOrders } from '../api/orders';
+import RewardProgressWidget from '../components/rewards/RewardProgressWidget';
 import { CardSkeleton, Skeleton } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import ErrorState from '../components/ui/ErrorState';
@@ -164,9 +165,11 @@ const Dashboard = () => {
         </div>
 
         <div className="rd-panel">
-          <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
-            <h3>Recent Rewards</h3>
-            <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+          <RewardProgressWidget />
+          <div style={{ marginTop: '1.25rem' }}>
+            <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
+              <h3>Recent Rewards</h3>
+            <Link className="btn btn-outline" to="/my-rewards" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
               View all
             </Link>
           </div>
@@ -196,6 +199,7 @@ const Dashboard = () => {
               })}
             </div>
           )}
+          </div>
         </div>
       </div>
     </UserLayout>

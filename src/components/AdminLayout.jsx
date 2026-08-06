@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   X,
   ClipboardList,
+  Gift,
 } from 'lucide-react';
 import Button from './Button';
 
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
   { key: 'orderRequests', label: 'Order Requests', icon: ClipboardList, to: '/order-requests' },
   { key: 'retailers', label: 'Retailers', icon: Store, to: '/retailers' },
+  { key: 'rewards', label: 'Rewards', icon: Gift, to: '/rewards' },
   { key: 'settings', label: 'System Settings', icon: Settings, to: '#', disabled: true },
 ];
 

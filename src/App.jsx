@@ -16,7 +16,11 @@ import Retailers from './pages/Retailers';
 import RetailerDetail from './pages/RetailerDetail';
 import OrderRequests from './pages/OrderRequests';
 import OrderRequestDetail from './pages/OrderRequestDetail';
+import MyRewards from './pages/MyRewards';
+import RewardDetail from './pages/RewardDetail';
+import AdminRewards from './pages/AdminRewards';
 import './styles/retailer.css';
+import './styles/rewards.css';
 
 function App() {
   return (
@@ -33,6 +37,8 @@ function App() {
               <Route path="/my-account" element={<MyAccount />} />
               <Route path="/orders" element={<MyOrders />} />
               <Route path="/orders/new" element={<CreateOrder />} />
+              <Route path="/my-rewards" element={<MyRewards />} />
+              <Route path="/my-rewards/:id" element={<RewardDetail />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
@@ -41,6 +47,7 @@ function App() {
               <Route path="/retailers/:id" element={<RetailerDetail />} />
               <Route path="/order-requests" element={<OrderRequests />} />
               <Route path="/order-requests/:orderId" element={<OrderRequestDetail />} />
+              <Route path="/rewards" element={<AdminRewards />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

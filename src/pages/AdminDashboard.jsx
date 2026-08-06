@@ -5,6 +5,7 @@ import DashboardStats from '../components/dashboard/DashboardStats';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import RecentActivities from '../components/dashboard/RecentActivities';
 import RecentOrderRequests from '../components/dashboard/RecentOrderRequests';
+import AdminRewardsWidget from '../components/rewards/AdminRewardsWidget';
 import { fetchDashboardStats, fetchRecentTransactions, fetchRecentActivities } from '../api/retailers';
 
 const AdminDashboard = () => {
@@ -58,6 +59,9 @@ const AdminDashboard = () => {
           </div>
           <div className="dashboard-right">
             <RecentOrderRequests />
+            <div style={{ marginTop: '1.5rem' }}>
+              <AdminRewardsWidget />
+            </div>
           </div>
         </div>
 
