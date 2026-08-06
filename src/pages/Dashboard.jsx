@@ -1,229 +1,200 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { 
-  LogOut, 
-  LayoutDashboard, 
-  ShieldCheck,
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Settings,
-  Bell,
-  Search,
-  Menu,
-  Plus,
-  TrendingUp,
-  X
-} from 'lucide-react';
-import Button from '../components/Button';
+import { Coins, TrendingUp, Award, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import UserLayout from '../components/UserLayout';
+import * as SELF from '../api/self';
+import { CardSkeleton, Skeleton } from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import ErrorState from '../components/ui/ErrorState';
+import { OrderStatusBadge, PaymentBadge, RewardTypeBadge } from '../components/ui/Badges';
+
+const formatDateTime = (value) => {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
+};
+
+const formatMoney = (value) =>
+  value == null ? '₹0' : `₹${Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
-  const isAdmin = user?.role === 'ADMIN';
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const [recentOrders, setRecentOrders] = useState(null);
+  const [rewards, setRewards] = useState([]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [p, orders, rw] = await Promise.all([
+        SELF.fetchMyRetailer(),
+        SELF.fetchMyOrders({ page: 0, size: 5 }),
+        SELF.fetchMyRewardHistory(),
+      ]);
+      setProfile(p);
+      setRecentOrders(orders);
+      setRewards(rw);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load your dashboard.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (user?.role === 'ADMIN') {
+    return <Navigate to="/admin" replace />;
+  }
+
+  if (loading) {
+    return (
+      <UserLayout title="Dashboard" subtitle="Your retailer summary" activeKey="dashboard">
+        <CardSkeleton cards={4} />
+        <div style={{ marginTop: '1.5rem' }}><Skeleton height={160} /></div>
+      </UserLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <UserLayout title="Dashboard" subtitle="Your retailer summary" activeKey="dashboard">
+        <ErrorState message={error} onRetry={load} />
+      </UserLayout>
+    );
+  }
+
+  const rewardInfo = profile?.rewardInfo;
+  const ordersList = recentOrders?.content || [];
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-header">
-          <h1 className="auth-logo" style={{ fontSize: '1.25rem' }}>
-            Hari Om <span>Enterprises</span>
-          </h1>
-          {mobileMenuOpen && (
-            <button className="mobile-menu-btn" onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', right: '1rem', top: '1.5rem' }}>
-              <X size={24} color="var(--text-main)" />
-            </button>
+    <UserLayout title="Dashboard" subtitle="Your retailer summary" activeKey="dashboard">
+      <div className="section-heading" style={{ marginTop: 0 }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Welcome back, {user?.name || 'there'}</h2>
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+            Here's what's happening with your {profile?.shopName || 'retailer'} account today.
+          </p>
+        </div>
+        <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          View Full Account
+        </Link>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-info">
+            <h3>Reward Balance</h3>
+            <p>{rewardInfo?.currentBalance ?? rewardInfo?.availablePoints ?? 0}</p>
+          </div>
+          <div className="stat-icon primary"><Coins size={24} /></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <h3>Lifetime Earned</h3>
+            <p>{rewardInfo?.lifetimeEarned ?? 0}</p>
+          </div>
+          <div className="stat-icon success"><TrendingUp size={24} /></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <h3>Points Redeemed</h3>
+            <p>{rewardInfo?.pointsRedeemed ?? 0}</p>
+          </div>
+          <div className="stat-icon secondary"><Coins size={24} /></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <h3>Current Tier</h3>
+            <p>{rewardInfo?.currentTier || profile?.tier || 'BRONZE'}</p>
+          </div>
+          <div className="stat-icon info"><Award size={24} /></div>
+        </div>
+      </div>
+
+      <div className="dashboard-split" style={{ marginTop: '1.5rem' }}>
+        <div className="table-card">
+          <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
+            <h3>Recent Orders</h3>
+            <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+              View all
+            </Link>
+          </div>
+          {ordersList.length === 0 ? (
+            <EmptyState message="No orders yet." />
+          ) : (
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Order Number</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ordersList.map((o) => (
+                    <tr key={o.id}>
+                      <td>{o.orderNumber}</td>
+                      <td>{formatDateTime(o.orderDate)}</td>
+                      <td className="amount">{formatMoney(o.totalAmount)}</td>
+                      <td><OrderStatusBadge status={o.orderStatus} /></td>
+                      <td><PaymentBadge status={o.paymentStatus} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-        
-        <nav className="sidebar-nav">
-          <a href="#" className="nav-item active">
-            <LayoutDashboard /> {isAdmin ? 'Dashboard' : 'User Dashboard'}
-          </a>
-          {isAdmin && (
-            <>
-              <Link to="/admin" className="nav-item">
-                <ShieldCheck /> Admin Dashboard
-              </Link>
-              <Link to="/admin" className="nav-item">
-                <Users /> Manage Users
-              </Link>
-              <a href="#" className="nav-item">
-                <Package /> Manage Products
-              </a>
-              <a href="#" className="nav-item">
-                <ShoppingCart /> Manage Orders
-              </a>
-              <a href="#" className="nav-item">
-                <Settings /> System Settings
-              </a>
-            </>
-          )}
-          {!isAdmin && (
-            <>
-              <a href="#" className="nav-item">
-                <Package /> View Products
-              </a>
-              <a href="#" className="nav-item">
-                <ShoppingCart /> View Orders
-              </a>
-              <a href="#" className="nav-item">
-                <Users /> Profile
-              </a>
-            </>
-          )}
-        </nav>
-        
-        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div>
-              <p style={{ fontWeight: '500', fontSize: '0.875rem', color: 'var(--text-main)' }}>{user?.name || 'User'}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{isAdmin ? 'ADMIN' : 'USER'}</p>
-            </div>
-          </div>
-          <Button variant="outline" style={{ width: '100%', justifyContent: 'center', gap: '0.5rem' }} onClick={logout}>
-            <LogOut size={18} /> Logout
-          </Button>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
-        {/* Topbar */}
-        <header className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button className="mobile-menu-btn" onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-main)' }}>
-              <Menu size={24} />
-            </button>
-            <div style={{ position: 'relative', display: 'none' }} className="search-bar-desktop">
-              <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                style={{ padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-main)' }}
-              />
-            </div>
+        <div className="rd-panel">
+          <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
+            <h3>Recent Rewards</h3>
+            <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+              View all
+            </Link>
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button style={{ background: 'none', border: 'none', position: 'relative', cursor: 'pointer', color: 'var(--text-muted)' }}>
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '0', right: '0', width: '8px', height: '8px', background: 'var(--error)', borderRadius: '50%' }}></span>
-            </button>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <div className="dashboard-content">
-          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.25rem' }}>Welcome back, {user?.name || 'User'} 👋</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Here's what's happening with Hari Om Enterprises today.</p>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <Button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Plus size={18} /> Add Product
-              </Button>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-info">
-                <h3>Total Products</h3>
-                <p>1,248</p>
-              </div>
-              <div className="stat-icon primary">
-                <Package size={24} />
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-info">
-                <h3>Total Orders</h3>
-                <p>384</p>
-              </div>
-              <div className="stat-icon secondary">
-                <ShoppingCart size={24} />
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-info">
-                <h3>Total Customers</h3>
-                <p>1,893</p>
-              </div>
-              <div className="stat-icon info">
-                <Users size={24} />
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-info">
-                <h3>Total Sales</h3>
-                <p>₹1.4M</p>
-              </div>
-              <div className="stat-icon success">
-                <TrendingUp size={24} />
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity & Quick Actions (Mock layout) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            <div style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Recent Activity</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[1, 2, 3].map((i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1rem', borderBottom: i !== 3 ? '1px solid var(--border-color)' : 'none' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }}></div>
-                    <div>
-                      <p style={{ fontWeight: '500', fontSize: '0.875rem' }}>New order #ORD-{4930 + i} placed</p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{i * 15} minutes ago</p>
+          {rewards.length === 0 ? (
+            <EmptyState message="No reward transactions yet." />
+          ) : (
+            <div className="rd-list">
+              {rewards.slice(0, 6).map((t) => {
+                const isEarned = (t.pointsEarned || 0) > 0;
+                const isRedeemed = (t.pointsRedeemed || 0) > 0;
+                const Icon = isRedeemed && !isEarned ? ArrowDownCircle : ArrowUpCircle;
+                return (
+                  <div className="rd-item" key={t.id}>
+                    <span className={`rd-icon ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>
+                      <Icon size={16} />
+                    </span>
+                    <div className="rd-body">
+                      <div className="rd-line">
+                        <strong>{isEarned ? `+${t.pointsEarned}` : isRedeemed ? `−${t.pointsRedeemed}` : '0'} points</strong>
+                        <RewardTypeBadge type={t.type} />
+                      </div>
+                      <p className="rd-sub">{formatDateTime(t.date)}{t.remarks ? ` · ${t.remarks}` : ''}</p>
                     </div>
+                    <span className={`rd-balance ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>{t.balance}</span>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-
-            <div style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>Quick Actions</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
-                <Button variant="outline" style={{ justifyContent: 'flex-start', padding: '1rem' }}>
-                  <Package size={18} style={{ marginRight: '0.75rem', color: 'var(--primary)' }} /> Manage Products
-                </Button>
-                <Button variant="outline" style={{ justifyContent: 'flex-start', padding: '1rem' }}>
-                  <ShoppingCart size={18} style={{ marginRight: '0.75rem', color: 'var(--secondary)' }} /> View Pending Orders
-                </Button>
-                <Button variant="outline" style={{ justifyContent: 'flex-start', padding: '1rem' }}>
-                  <Users size={18} style={{ marginRight: '0.75rem', color: 'var(--success)' }} /> Customer Support
-                </Button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      </main>
-      
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div 
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 30 }}
-          onClick={toggleMobileMenu}
-        />
-      )}
-    </div>
+      </div>
+    </UserLayout>
   );
 };
 
