@@ -320,7 +320,7 @@ const MyAccount = () => {
                           <td>{o.orderNumber}</td>
                           <td>{formatDateTime(o.orderDate)}</td>
                           <td>{formatMoney(o.totalAmount)}</td>
-                          <td><OrderStatusBadge status={o.orderStatus} /></td>
+                          <td><OrderStatusBadge status={o.status} /></td>
                           <td><PaymentBadge status={o.paymentStatus} /></td>
                           <td>
                             <button className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => openOrder(o.id)}>

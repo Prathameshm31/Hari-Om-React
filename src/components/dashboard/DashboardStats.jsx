@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store, Users, UserX, Coins, CalendarPlus, ShoppingCart, Wallet, Package } from 'lucide-react';
+import { Store, Users, ShoppingCart, Wallet, CheckCircle2, XCircle, PackageCheck, Cog } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 
 const formatNum = (v) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Number(v || 0));
@@ -33,14 +33,14 @@ const DashboardStats = ({ stats, loading }) => {
   const s = stats || {};
   return (
     <div className="stats-grid">
+      <Card label="Pending Order Requests" value={formatNum(s.pendingOrders)} icon={<ShoppingCart size={24} />} cls="secondary" />
+      <Card label="Approved Today" value={formatNum(s.approvedToday)} icon={<CheckCircle2 size={24} />} cls="success" />
+      <Card label="Rejected Today" value={formatNum(s.rejectedToday)} icon={<XCircle size={24} />} cls="danger" />
+      <Card label="Orders in Processing" value={formatNum(s.processingOrders)} icon={<Cog size={24} />} cls="info" />
+      <Card label="Delivered Orders" value={formatNum(s.deliveredOrders)} icon={<PackageCheck size={24} />} cls="primary" />
       <Card label="Total Retailers" value={formatNum(s.totalRetailers)} icon={<Store size={24} />} cls="primary" />
       <Card label="Active Retailers" value={formatNum(s.activeRetailers)} icon={<Users size={24} />} cls="success" />
-      <Card label="Inactive Retailers" value={formatNum(s.inactiveRetailers)} icon={<UserX size={24} />} cls="secondary" />
-      <Card label="Reward Points Distributed" value={formatNum(s.totalRewardPoints)} icon={<Coins size={24} />} cls="info" />
-      <Card label="Retailers Added This Month" value={formatNum(s.retailersAddedThisMonth)} icon={<CalendarPlus size={24} />} cls="primary" />
-      <Card label="Pending Orders" value={formatNum(s.pendingOrders)} icon={<ShoppingCart size={24} />} cls="secondary" />
       <Card label="Total Orders" value={formatNum(s.totalOrders)} icon={<Wallet size={24} />} cls="info" />
-      <Card label="Total Products" value={formatNum(s.totalProducts)} icon={<Package size={24} />} cls="success" />
     </div>
   );
 };

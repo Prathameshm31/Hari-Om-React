@@ -20,11 +20,12 @@ export const TierBadge = ({ tier, size = 'md' }) => {
 export const OrderStatusBadge = ({ status }) => {
   const map = {
     PENDING: '#f59e0b',
-    CONFIRMED: '#0ea5e9',
+    APPROVED: '#22c55e',
+    REJECTED: '#ef4444',
     PROCESSING: '#8b5cf6',
     SHIPPED: '#6366f1',
-    DELIVERED: '#22c55e',
-    CANCELLED: '#ef4444',
+    DELIVERED: '#0ea5e9',
+    CANCELLED: '#64748b',
   };
   const color = map[status] || '#64748b';
   return (

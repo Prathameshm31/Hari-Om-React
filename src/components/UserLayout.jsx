@@ -9,11 +9,13 @@ import {
   Menu,
   X,
   UserRound,
+  ShoppingBag,
 } from 'lucide-react';
 import Button from './Button';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/' },
+  { key: 'orders', label: 'My Orders', icon: ShoppingBag, to: '/orders' },
   { key: 'account', label: 'My Account', icon: Store, to: '/my-account' },
 ];
 

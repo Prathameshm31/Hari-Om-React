@@ -4,6 +4,7 @@ import TopRetailers from '../components/dashboard/TopRetailers';
 import DashboardStats from '../components/dashboard/DashboardStats';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import RecentActivities from '../components/dashboard/RecentActivities';
+import RecentOrderRequests from '../components/dashboard/RecentOrderRequests';
 import { fetchDashboardStats, fetchRecentTransactions, fetchRecentActivities } from '../api/retailers';
 
 const AdminDashboard = () => {
@@ -47,7 +48,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <AdminLayout title="Admin Dashboard" subtitle="Overview of retailers and reward activity" activeKey="dashboard">
+    <AdminLayout title="Admin Dashboard" subtitle="Overview of retailers, orders and reward activity" activeKey="dashboard">
       <DashboardStats stats={stats} loading={statsLoading} />
 
       <section className="section">
@@ -56,6 +57,12 @@ const AdminDashboard = () => {
             <TopRetailers />
           </div>
           <div className="dashboard-right">
+            <RecentOrderRequests />
+          </div>
+        </div>
+
+        <div className="dashboard-split" style={{ marginTop: '1.5rem' }}>
+          <div className="dashboard-right" style={{ flex: 1 }}>
             <RecentTransactions data={recentTx} loading={txLoading} onRefresh={loadRecentTx} />
           </div>
         </div>

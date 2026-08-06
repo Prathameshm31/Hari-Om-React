@@ -15,4 +15,6 @@ export const fetchMyOrderDetail = (orderId) => api.get(`/me/orders/${orderId}`).
 
 export const fetchMyRewardHistory = () => api.get('/me/reward-history').then((r) => r.data);
 
+export const fetchMyActivities = () => api.get('/me/activities').then((r) => r.data);
+
 export const fetchMyTierHistory = () => api.get('/me/tier-history').then((r) => r.data);

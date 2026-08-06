@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Coins, TrendingUp, Award, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCircle2, XCircle, PackageCheck } from 'lucide-react';
 import UserLayout from '../components/UserLayout';
 import * as SELF from '../api/self';
+import { fetchMyOrders } from '../api/orders';
 import { CardSkeleton, Skeleton } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import ErrorState from '../components/ui/ErrorState';
-import { OrderStatusBadge, PaymentBadge, RewardTypeBadge } from '../components/ui/Badges';
+import { OrderStatusBadge, RewardTypeBadge } from '../components/ui/Badges';
 
 const formatDateTime = (value) => {
   if (!value) return '—';
@@ -34,7 +35,7 @@ const Dashboard = () => {
     try {
       const [p, orders, rw] = await Promise.all([
         SELF.fetchMyRetailer(),
-        SELF.fetchMyOrders({ page: 0, size: 5 }),
+        fetchMyOrders({ page: 0, size: 100 }),
         SELF.fetchMyRewardHistory(),
       ]);
       setProfile(p);
@@ -51,6 +52,17 @@ const Dashboard = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  const ordersList = recentOrders?.content || [];
+
+  const orderStats = useMemo(() => {
+    const stats = { PENDING: 0, APPROVED: 0, REJECTED: 0, DELIVERED: 0, TOTAL: 0 };
+    (recentOrders?.content || []).forEach((o) => {
+      stats.TOTAL += 1;
+      if (stats[o.status] !== undefined) stats[o.status] += 1;
+    });
+    return stats;
+  }, [recentOrders]);
 
   if (user?.role === 'ADMIN') {
     return <Navigate to="/admin" replace />;
@@ -73,8 +85,13 @@ const Dashboard = () => {
     );
   }
 
-  const rewardInfo = profile?.rewardInfo;
-  const ordersList = recentOrders?.content || [];
+  const statsCards = [
+    { label: 'Total Orders', value: orderStats.TOTAL, icon: ShoppingBag, cls: 'primary' },
+    { label: 'Pending Orders', value: orderStats.PENDING, icon: Clock, cls: 'secondary' },
+    { label: 'Approved Orders', value: orderStats.APPROVED, icon: CheckCircle2, cls: 'success' },
+    { label: 'Rejected Orders', value: orderStats.REJECTED, icon: XCircle, cls: 'danger' },
+    { label: 'Delivered Orders', value: orderStats.DELIVERED, icon: PackageCheck, cls: 'info' },
+  ];
 
   return (
     <UserLayout title="Dashboard" subtitle="Your retailer summary" activeKey="dashboard">
@@ -85,47 +102,36 @@ const Dashboard = () => {
             Here's what's happening with your {profile?.shopName || 'retailer'} account today.
           </p>
         </div>
-        <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-          View Full Account
-        </Link>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Link className="btn btn-primary" to="/orders/new" style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <PlusCircle size={18} /> Create New Order
+          </Link>
+          <Link className="btn btn-outline" to="/orders" style={{ width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ShoppingBag size={18} /> My Orders
+          </Link>
+        </div>
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-info">
-            <h3>Reward Balance</h3>
-            <p>{rewardInfo?.currentBalance ?? rewardInfo?.availablePoints ?? 0}</p>
-          </div>
-          <div className="stat-icon primary"><Coins size={24} /></div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-info">
-            <h3>Lifetime Earned</h3>
-            <p>{rewardInfo?.lifetimeEarned ?? 0}</p>
-          </div>
-          <div className="stat-icon success"><TrendingUp size={24} /></div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-info">
-            <h3>Points Redeemed</h3>
-            <p>{rewardInfo?.pointsRedeemed ?? 0}</p>
-          </div>
-          <div className="stat-icon secondary"><Coins size={24} /></div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-info">
-            <h3>Current Tier</h3>
-            <p>{rewardInfo?.currentTier || profile?.tier || 'BRONZE'}</p>
-          </div>
-          <div className="stat-icon info"><Award size={24} /></div>
-        </div>
+        {statsCards.map((c) => {
+          const Icon = c.icon;
+          return (
+            <div className="stat-card" key={c.label}>
+              <div className="stat-info">
+                <h3>{c.label}</h3>
+                <p>{c.value}</p>
+              </div>
+              <div className={`stat-icon ${c.cls}`}><Icon size={24} /></div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="dashboard-split" style={{ marginTop: '1.5rem' }}>
         <div className="table-card">
           <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
             <h3>Recent Orders</h3>
-            <Link className="btn btn-outline" to="/my-account" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+            <Link className="btn btn-outline" to="/orders" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
               View all
             </Link>
           </div>
@@ -140,17 +146,15 @@ const Dashboard = () => {
                     <th>Date</th>
                     <th>Total</th>
                     <th>Status</th>
-                    <th>Payment</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {ordersList.map((o) => (
+                  {ordersList.slice(0, 8).map((o) => (
                     <tr key={o.id}>
-                      <td>{o.orderNumber}</td>
+                      <td className="order-no">{o.orderNumber}</td>
                       <td>{formatDateTime(o.orderDate)}</td>
-                      <td className="amount">{formatMoney(o.totalAmount)}</td>
-                      <td><OrderStatusBadge status={o.orderStatus} /></td>
-                      <td><PaymentBadge status={o.paymentStatus} /></td>
+                      <td className="amount">{formatMoney(o.finalAmount ?? o.totalAmount)}</td>
+                      <td><OrderStatusBadge status={o.status} /></td>
                     </tr>
                   ))}
                 </tbody>

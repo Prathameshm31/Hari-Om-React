@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Package, IndianRupee, CreditCard, Truck, Receipt } from 'lucide-react';
+import { X, Package, IndianRupee, CreditCard, Truck, Receipt, Ban, CheckCircle2 } from 'lucide-react';
 import { OrderStatusBadge, PaymentBadge } from '../ui/Badges';
 import { Skeleton } from '../ui/Skeleton';
 
@@ -63,9 +63,21 @@ const OrderDetailDrawer = ({ open, onClose, order, loading, onRetry }) => {
                   <InfoRow label="Order Date" value={formatDateTime(order.orderDate)} />
                   <InfoRow label="Delivery Date" value={order.deliveryDate} />
                   <InfoRow label="Payment Method" value={order.paymentMethod} />
-                  <InfoRow label="Sales Representative" value={order.salesRepresentative} />
                   <InfoRow label="Delivery Address" value={order.deliveryAddress} />
+                  <InfoRow label="Remarks" value={order.remarks} />
                 </div>
+                {order.status === 'REJECTED' && (
+                  <div className="rejection-box">
+                    <h5><Ban size={14} /> Reason for Rejection</h5>
+                    <p>{order.rejectionReason || '—'}</p>
+                  </div>
+                )}
+                {order.status === 'APPROVED' && (
+                  <div className="approval-box">
+                    <h5><CheckCircle2 size={14} /> Approved</h5>
+                    <p>{formatDateTime(order.approvedDate)}</p>
+                  </div>
+                )}
               </section>
 
               <section className="drawer-section">

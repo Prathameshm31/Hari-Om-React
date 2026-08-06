@@ -259,6 +259,7 @@ body {
 .stat-icon.secondary { background: #fff7ed; color: var(--secondary); }
 .stat-icon.success { background: #f0fdf4; color: var(--success); }
 .stat-icon.info { background: #f0f9ff; color: #0ea5e9; }
+.stat-icon.danger { background: #fef2f2; color: var(--error); }
 
 /* Components */
 .input-group {
