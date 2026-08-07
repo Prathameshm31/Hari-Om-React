@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Store, Phone, Mail, MapPin, Building2, Coins, Award, TrendingUp, Eye, RefreshCw } from 'lucide-react';
+import { Store, Phone, Mail, MapPin, Building2, Coins, Award, TrendingUp, Eye, RefreshCw, Users } from 'lucide-react';
 import UserLayout from '../components/UserLayout';
 import * as SELF from '../api/self';
 import Pagination from '../components/ui/Pagination';
@@ -135,6 +135,7 @@ const TierHistoryTab = ({ data, loading, onRefresh }) => (
 
 const MyAccount = () => {
   const [profile, setProfile] = useState(null);
+  const [myTeam, setMyTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -157,6 +158,12 @@ const MyAccount = () => {
     try {
       const data = await SELF.fetchMyRetailer();
       setProfile(data);
+      try {
+        const { fetchMyTeam } = await import('../api/teams');
+        setMyTeam(await fetchMyTeam());
+      } catch {
+        setMyTeam(null);
+      }
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load account information.');
@@ -284,6 +291,14 @@ const MyAccount = () => {
               <InfoItem icon={MapPin} label="City" value={[profile?.city, profile?.state].filter(Boolean).join(', ')} />
               <InfoItem icon={MapPin} label="Address" value={profile?.address} />
               <InfoItem icon={Mail} label="GST Number" value={profile?.gstNumber} />
+            </div>
+          </div>
+
+          <div className="rd-panel" style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>Team Information</h3>
+            <div className="detail-grid">
+              <InfoItem icon={Users} label="Team Name" value={myTeam?.team?.teamName || 'Unassigned'} />
+              <InfoItem icon={Award} label="Team Rank" value={myTeam?.team?.rank ? `#${myTeam?.team?.rank}` : '—'} />
             </div>
           </div>
 

@@ -6,20 +6,23 @@ import {
   LayoutDashboard,
   Store,
   Settings,
-  Bell,
   Menu,
   ShieldCheck,
   X,
   ClipboardList,
   Gift,
+  Users,
 } from 'lucide-react';
 import Button from './Button';
+import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
   { key: 'orderRequests', label: 'Order Requests', icon: ClipboardList, to: '/order-requests' },
   { key: 'retailers', label: 'Retailers', icon: Store, to: '/retailers' },
   { key: 'rewards', label: 'Rewards', icon: Gift, to: '/rewards' },
+  { key: 'teams', label: 'Team Management', icon: Users, to: '/teams' },
   { key: 'settings', label: 'System Settings', icon: Settings, to: '#', disabled: true },
 ];
 
@@ -111,11 +114,9 @@ const AdminLayout = ({ title, subtitle, activeKey, children }) => {
               <ShieldCheck size={20} color="var(--primary)" /> Admin Panel
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button style={{ background: 'none', border: 'none', position: 'relative', cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Notifications">
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '0', right: '0', width: '8px', height: '8px', background: 'var(--error)', borderRadius: '50%' }} />
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ThemeToggle />
+            <NotificationBell />
           </div>
         </header>
 

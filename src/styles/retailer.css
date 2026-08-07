@@ -313,6 +313,17 @@ th.sortable.active {
   font-weight: 600;
   color: var(--primary);
 }
+.team-name-link {
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.team-name-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
 .remarks-cell {
   max-width: 260px;
   white-space: normal !important;
@@ -657,6 +668,17 @@ th.sortable.active {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
+}
+.table-card > .card-header {
+  padding: 1.25rem 1.5rem 0;
+  margin-bottom: 0;
+}
+.table-card > .card-header h4 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.table-card > .card-header + .table-scroll .data-table thead th:first-child {
+  border-top: 1px solid var(--border-color);
 }
 .card-header h4 {
   font-size: 1rem;

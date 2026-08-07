@@ -14,7 +14,7 @@ import { useToast } from '../components/ui/Toast';
 
 const MyRewards = () => {
   const { user } = useAuth();
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [rewards, setRewards] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,11 +53,11 @@ const MyRewards = () => {
     setIsClaiming(true);
     try {
       await claimReward(selectedReward.rewardId);
-      addToast('Reward claimed successfully! Please contact support to collect your gift.', 'success');
+      toast('Reward claimed successfully! Please contact support to collect your gift.', 'success');
       load(); // Refresh data to update points and status
       setSelectedReward(null);
     } catch (err) {
-      addToast(err.response?.data?.message || 'Failed to claim reward.', 'error');
+      toast(err.response?.data?.message || 'Failed to claim reward.', 'error');
     } finally {
       setIsClaiming(false);
     }

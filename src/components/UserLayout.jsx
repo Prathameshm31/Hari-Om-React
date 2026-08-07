@@ -5,7 +5,6 @@ import {
   LogOut,
   LayoutDashboard,
   Store,
-  Bell,
   Menu,
   X,
   UserRound,
@@ -13,6 +12,8 @@ import {
   Gift,
 } from 'lucide-react';
 import Button from './Button';
+import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/' },
@@ -105,11 +106,9 @@ const UserLayout = ({ title, subtitle, activeKey, children }) => {
               <UserRound size={20} color="var(--primary)" /> My Account
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button style={{ background: 'none', border: 'none', position: 'relative', cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Notifications">
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '0', right: '0', width: '8px', height: '8px', background: 'var(--error)', borderRadius: '50%' }} />
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ThemeToggle />
+            <NotificationBell />
           </div>
         </header>
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCircle2, XCircle, PackageCheck } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCircle2, XCircle, PackageCheck, Users } from 'lucide-react';
 import UserLayout from '../components/UserLayout';
 import * as SELF from '../api/self';
 import { fetchMyOrders } from '../api/orders';
@@ -30,6 +30,7 @@ const Dashboard = () => {
 
   const [recentOrders, setRecentOrders] = useState(null);
   const [rewards, setRewards] = useState([]);
+  const [myTeam, setMyTeam] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -42,6 +43,12 @@ const Dashboard = () => {
       setProfile(p);
       setRecentOrders(orders);
       setRewards(rw);
+      try {
+        const { fetchMyTeam } = await import('../api/teams');
+        setMyTeam(await fetchMyTeam());
+      } catch (err) {
+        console.log('No team assigned or error');
+      }
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load your dashboard.');
@@ -128,9 +135,47 @@ const Dashboard = () => {
         })}
       </div>
 
+      <div className="tr-widget rd-panel" style={{ marginTop: '1.5rem' }}>
+        <div className="tr-widget-header">
+          <div className="tr-title">
+            <span className="tr-title-icon" style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}>
+              <Users size={20} />
+            </span>
+            <div>
+              <h3>My Team</h3>
+              <p>Your team performance at a glance</p>
+            </div>
+          </div>
+        </div>
+        {myTeam ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', alignItems: 'center' }}>
+            <div style={{ minWidth: '160px', flex: '1 1 200px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary)', marginBottom: '0.25rem' }}>{myTeam.team?.teamName || 'My Team'}</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Leader: {myTeam.team?.leaderName || 'Unassigned'}</p>
+            </div>
+            <div style={{ display: 'flex', gap: '1.75rem' }}>
+              <div>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Rank</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-main)' }}>#{myTeam.team?.rank}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Points</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-main)' }}>{myTeam.team?.teamPoints}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Members</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-main)' }}>{myTeam.team?.totalMembers}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>You are not assigned to any team yet.</p>
+        )}
+      </div>
+
       <div className="dashboard-split" style={{ marginTop: '1.5rem' }}>
         <div className="table-card">
-          <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
+          <div className="section-heading" style={{ marginBottom: '0.75rem', padding: '1.25rem 1.5rem 0' }}>
             <h3>Recent Orders</h3>
             <Link className="btn btn-outline" to="/orders" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
               View all
@@ -164,41 +209,42 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="rd-panel">
+        <div className="dashboard-right">
           <RewardProgressWidget />
-          <div style={{ marginTop: '1.25rem' }}>
+
+          <div className="rd-panel" style={{ marginTop: '1.5rem' }}>
             <div className="section-heading" style={{ marginBottom: '0.75rem' }}>
               <h3>Recent Rewards</h3>
-            <Link className="btn btn-outline" to="/my-rewards" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
-              View all
-            </Link>
-          </div>
-          {rewards.length === 0 ? (
-            <EmptyState message="No reward transactions yet." />
-          ) : (
-            <div className="rd-list">
-              {rewards.slice(0, 6).map((t) => {
-                const isEarned = (t.pointsEarned || 0) > 0;
-                const isRedeemed = (t.pointsRedeemed || 0) > 0;
-                const Icon = isRedeemed && !isEarned ? ArrowDownCircle : ArrowUpCircle;
-                return (
-                  <div className="rd-item" key={t.id}>
-                    <span className={`rd-icon ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>
-                      <Icon size={16} />
-                    </span>
-                    <div className="rd-body">
-                      <div className="rd-line">
-                        <strong>{isEarned ? `+${t.pointsEarned}` : isRedeemed ? `−${t.pointsRedeemed}` : '0'} points</strong>
-                        <RewardTypeBadge type={t.type} />
-                      </div>
-                      <p className="rd-sub">{formatDateTime(t.date)}{t.remarks ? ` · ${t.remarks}` : ''}</p>
-                    </div>
-                    <span className={`rd-balance ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>{t.balance}</span>
-                  </div>
-                );
-              })}
+              <Link className="btn btn-outline" to="/my-rewards" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+                View all
+              </Link>
             </div>
-          )}
+            {rewards.length === 0 ? (
+              <EmptyState message="No reward transactions yet." />
+            ) : (
+              <div className="rd-list">
+                {rewards.slice(0, 6).map((t) => {
+                  const isEarned = (t.pointsEarned || 0) > 0;
+                  const isRedeemed = (t.pointsRedeemed || 0) > 0;
+                  const Icon = isRedeemed && !isEarned ? ArrowDownCircle : ArrowUpCircle;
+                  return (
+                    <div className="rd-item" key={t.id}>
+                      <span className={`rd-icon ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>
+                        <Icon size={16} />
+                      </span>
+                      <div className="rd-body">
+                        <div className="rd-line">
+                          <strong>{isEarned ? `+${t.pointsEarned}` : isRedeemed ? `−${t.pointsRedeemed}` : '0'} points</strong>
+                          <RewardTypeBadge type={t.type} />
+                        </div>
+                        <p className="rd-sub">{formatDateTime(t.date)}{t.remarks ? ` · ${t.remarks}` : ''}</p>
+                      </div>
+                      <span className={`rd-balance ${isRedeemed && !isEarned ? 'neg' : 'pos'}`}>{t.balance}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
