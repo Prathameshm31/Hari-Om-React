@@ -64,7 +64,11 @@ const UserLayout = ({ title, subtitle, activeKey, children }) => {
         </nav>
 
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <Link
+            to="/my-profile"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', textDecoration: 'none' }}
+            title="My Profile"
+          >
             <div
               style={{
                 width: '40px',
@@ -76,6 +80,7 @@ const UserLayout = ({ title, subtitle, activeKey, children }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
+                cursor: 'pointer',
               }}
             >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -84,7 +89,7 @@ const UserLayout = ({ title, subtitle, activeKey, children }) => {
               <p style={{ fontWeight: '500', fontSize: '0.875rem', color: 'var(--text-main)' }}>{user?.name || 'User'}</p>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>USER</p>
             </div>
-          </div>
+          </Link>
           <Button variant="outline" style={{ width: '100%', justifyContent: 'center', gap: '0.5rem' }} onClick={logout}>
             <LogOut size={18} /> Logout
           </Button>

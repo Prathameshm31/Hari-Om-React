@@ -2,7 +2,43 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, Trash2, Inbox } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
+import { useAuth } from '../hooks/useAuth';
 import { formatRelativeTime } from '../utils/time';
+
+const VALID_PREFIXES = ['/orders', '/my-account', '/my-rewards', '/my-team', '/order-requests', '/retailers', '/rewards', '/teams', '/products'];
+
+const isValidRoute = (link) => {
+  if (typeof link !== 'string' || !link.startsWith('/')) return false;
+  const path = link.split('?')[0].split('#')[0];
+  if (path === '/' || path === '/admin') return true;
+  return VALID_PREFIXES.some((p) => path === p || path.startsWith(p + '/'));
+};
+
+const typeFallback = (type, role) => {
+  switch (type) {
+    case 'ORDER':
+      return role === 'ADMIN' ? '/order-requests' : '/orders';
+    case 'REWARD':
+      return role === 'ADMIN' ? '/rewards' : '/my-rewards';
+    case 'TEAM':
+      return role === 'ADMIN' ? '/teams' : '/my-team';
+    case 'PRODUCT':
+      return '/products';
+    case 'RETAILER':
+      return '/retailers';
+    case 'ACCOUNT':
+      return role === 'ADMIN' ? '/admin' : '/';
+    default:
+      return null;
+  }
+};
+
+const resolveLink = (notification, role) => {
+  if (isValidRoute(notification?.link)) {
+    return notification.link;
+  }
+  return typeFallback(notification?.type, role);
+};
 
 const NotificationBell = () => {
   const {
@@ -15,6 +51,7 @@ const NotificationBell = () => {
     markAllRead,
     remove,
   } = useNotifications();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -34,8 +71,9 @@ const NotificationBell = () => {
     if (!notification.isRead) {
       markRead(notification.id);
     }
-    if (notification.link) {
-      navigate(notification.link);
+    const link = resolveLink(notification, user?.role);
+    if (link) {
+      navigate(link);
     }
     close();
   };

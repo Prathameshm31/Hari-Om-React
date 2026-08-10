@@ -22,6 +22,14 @@ import { useToast } from '../components/ui/Toast';
 
 const UNITS = ['Bag', 'Ton', 'Piece', 'Kg', 'Coil', 'Bucket', 'Packet', 'Box', 'Litre', 'Roll'];
 
+const productUnits = (p) => {
+  if (Array.isArray(p?.units) && p.units.length) return p.units;
+  if (p?.unit) return String(p.unit).split(',').map((u) => u.trim()).filter(Boolean);
+  return [];
+};
+
+const firstUnit = (p) => productUnits(p)[0] || UNITS[0];
+
 const formatMoney = (value) =>
   value === null || value === undefined ? '—' : `₹${Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
@@ -37,6 +45,7 @@ const CreateOrder = () => {
   const [category, setCategory] = useState('ALL');
 
   const [cart, setCart] = useState([]);
+  const [unitSel, setUnitSel] = useState({});
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [remarks, setRemarks] = useState('');
@@ -82,17 +91,19 @@ const CreateOrder = () => {
   }, [cart]);
 
   const addToCart = (product) => {
+    const unit = unitSel[product.id] || firstUnit(product);
     setCart((prev) => {
       const existing = prev.find((c) => c.productId === product.id);
       if (existing) {
-        return prev.map((c) => (c.productId === product.id ? { ...c, quantity: c.quantity + 1 } : c));
+        return prev.map((c) => (c.productId === product.id ? { ...c, unit, quantity: c.quantity + 1 } : c));
       }
       return [...prev, {
         productId: product.id,
         productName: product.productName,
         brand: product.brand,
         category: product.category,
-        unit: product.unit || 'Piece',
+        unit,
+        units: productUnits(product),
         price: Number(product.price) || 0,
         imageUrl: product.imageUrl,
         quantity: 1,
@@ -197,13 +208,23 @@ const CreateOrder = () => {
                     <p>{p.brand} · {p.category}</p>
                     <div className="product-card-stats">
                       <div>
-                        <span>Unit</span>
-                        <strong>{p.unit || '—'}</strong>
-                      </div>
-                      <div>
                         <span>Price</span>
                         <strong>{formatMoney(p.price)}</strong>
                       </div>
+                    </div>
+                    <div className="product-card-unit">
+                      <span>Unit</span>
+                      {productUnits(p).length > 1 ? (
+                        <select
+                          value={unitSel[p.id] || firstUnit(p)}
+                          onChange={(e) => setUnitSel((s) => ({ ...s, [p.id]: e.target.value }))}
+                          aria-label={`Unit for ${p.productName}`}
+                        >
+                          {productUnits(p).map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      ) : (
+                        <strong>{productUnits(p)[0] || '—'}</strong>
+                      )}
                     </div>
                     <button className="btn btn-primary btn-add" style={{ width: '100%', marginTop: '0.5rem' }} onClick={() => addToCart(p)}>
                       <Plus size={16} /> Add to Order
@@ -263,7 +284,7 @@ const CreateOrder = () => {
                           onChange={(e) => updateCart(item.productId, { unit: e.target.value })}
                           title="Unit"
                         >
-                          {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                          {(item.units && item.units.length ? item.units : UNITS).map((u) => <option key={u} value={u}>{u}</option>)}
                         </select>
                         <button className="cart-remove" type="button" onClick={() => removeFromCart(item.productId)} aria-label="Remove">
                           <Trash2 size={15} />

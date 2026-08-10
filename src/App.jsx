@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import OtpVerification from './pages/OtpVerification';
 import Dashboard from './pages/Dashboard';
 import MyAccount from './pages/MyAccount';
+import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
 import CreateOrder from './pages/CreateOrder';
 import AdminDashboard from './pages/AdminDashboard';
@@ -20,12 +21,15 @@ import OrderRequests from './pages/OrderRequests';
 import OrderRequestDetail from './pages/OrderRequestDetail';
 import MyRewards from './pages/MyRewards';
 import RewardDetail from './pages/RewardDetail';
+import MyTeam from './pages/MyTeam';
 import AdminRewards from './pages/AdminRewards';
 import AdminTeams from './pages/AdminTeams';
 import AdminTeamDetail from './pages/AdminTeamDetail';
+import AdminProducts from './pages/AdminProducts';
 import './styles/retailer.css';
 import './styles/rewards.css';
 import './styles/notifications.css';
+import './styles/products.css';
 
 function App() {
   return (
@@ -42,10 +46,12 @@ function App() {
                 <Route element={<ProtectedRoute allowedRoles={['USER', 'ADMIN']} />}>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/my-account" element={<MyAccount />} />
+                  <Route path="/my-profile" element={<Profile />} />
                   <Route path="/orders" element={<MyOrders />} />
                   <Route path="/orders/new" element={<CreateOrder />} />
                   <Route path="/my-rewards" element={<MyRewards />} />
                   <Route path="/my-rewards/:id" element={<RewardDetail />} />
+                  <Route path="/my-team" element={<MyTeam />} />
                 </Route>
 
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
@@ -57,6 +63,7 @@ function App() {
                   <Route path="/rewards" element={<AdminRewards />} />
                   <Route path="/teams" element={<AdminTeams />} />
                   <Route path="/teams/:id" element={<AdminTeamDetail />} />
+                  <Route path="/products" element={<AdminProducts />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

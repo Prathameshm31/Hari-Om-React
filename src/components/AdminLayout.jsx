@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Gift,
   Users,
+  Package,
 } from 'lucide-react';
 import Button from './Button';
 import ThemeToggle from './ThemeToggle';
@@ -21,9 +22,9 @@ const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
   { key: 'orderRequests', label: 'Order Requests', icon: ClipboardList, to: '/order-requests' },
   { key: 'retailers', label: 'Retailers', icon: Store, to: '/retailers' },
+  { key: 'products', label: 'Products', icon: Package, to: '/products' },
   { key: 'rewards', label: 'Rewards', icon: Gift, to: '/rewards' },
   { key: 'teams', label: 'Team Management', icon: Users, to: '/teams' },
-  { key: 'settings', label: 'System Settings', icon: Settings, to: '#', disabled: true },
 ];
 
 const AdminLayout = ({ title, subtitle, activeKey, children }) => {
@@ -72,7 +73,11 @@ const AdminLayout = ({ title, subtitle, activeKey, children }) => {
         </nav>
 
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <Link
+            to="/my-profile"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', textDecoration: 'none' }}
+            title="My Profile"
+          >
             <div
               style={{
                 width: '40px',
@@ -84,6 +89,7 @@ const AdminLayout = ({ title, subtitle, activeKey, children }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
+                cursor: 'pointer',
               }}
             >
               {user?.name?.charAt(0).toUpperCase() || 'A'}
@@ -92,7 +98,7 @@ const AdminLayout = ({ title, subtitle, activeKey, children }) => {
               <p style={{ fontWeight: '500', fontSize: '0.875rem', color: 'var(--text-main)' }}>{user?.name || 'Admin'}</p>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ADMIN</p>
             </div>
-          </div>
+          </Link>
           <Button variant="outline" style={{ width: '100%', justifyContent: 'center', gap: '0.5rem' }} onClick={logout}>
             <LogOut size={18} /> Logout
           </Button>

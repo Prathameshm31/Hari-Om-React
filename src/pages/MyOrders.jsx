@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   PlusCircle,
   Eye,
@@ -43,6 +43,7 @@ const formatMoney = (value) =>
 
 const MyOrders = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,6 +54,7 @@ const MyOrders = () => {
 
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [highlightId, setHighlightId] = useState(null);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelBusy, setCancelBusy] = useState(false);
 
@@ -71,6 +73,18 @@ const MyOrders = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    const raw = searchParams.get('order');
+    if (raw && /^\d+$/.test(raw)) {
+      const id = Number(raw);
+      setHighlightId(id);
+      openOrder(id);
+      searchParams.delete('order');
+      setSearchParams(searchParams, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const orders = data?.content || [];
 
@@ -213,7 +227,7 @@ const MyOrders = () => {
                 </thead>
                 <tbody>
                   {orders.map((o) => (
-                    <tr key={o.id} className="row-hover">
+                    <tr key={o.id} className={`row-hover ${highlightId === o.id ? 'highlight-row' : ''}`}>
                       <td className="order-no">{o.orderNumber}</td>
                       <td>{formatDateTime(o.orderDate)}</td>
                       <td>

@@ -255,6 +255,12 @@
 .row-hover:hover {
   background: #f8fafc;
 }
+.highlight-row {
+  background: #eff6ff !important;
+}
+.highlight-row:hover {
+  background: #eff6ff !important;
+}
 th.sortable {
   cursor: pointer;
   user-select: none;
@@ -949,6 +955,30 @@ th.sortable.active {
   text-transform: uppercase;
 }
 .product-card-stats strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.product-card-unit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.product-card-unit > span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.product-card-unit select {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.8rem;
+}
+.product-card-unit strong {
   font-size: 0.95rem;
   font-weight: 700;
 }

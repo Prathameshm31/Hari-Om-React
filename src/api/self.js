@@ -2,6 +2,8 @@ import api from './client';
 
 export const fetchMyRetailer = () => api.get('/me/retailer').then((r) => r.data);
 
+export const updateMyRetailer = (payload) => api.put('/me/retailer', payload).then((r) => r.data);
+
 export const fetchMyOrders = (params = {}) => {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
