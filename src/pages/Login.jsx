@@ -89,7 +89,7 @@ const Login = () => {
           />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-            <Button type="button" variant="text" style={{ fontSize: '0.875rem' }}>
+            <Button type="button" variant="text" style={{ fontSize: '0.875rem' }} onClick={() => navigate('/forgot-password')}>
               Forgot Password?
             </Button>
           </div>

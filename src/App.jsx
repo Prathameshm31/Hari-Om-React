@@ -9,6 +9,8 @@ import { ToastProvider } from './components/ui/Toast';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import OtpVerification from './pages/OtpVerification';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import MyAccount from './pages/MyAccount';
 import Profile from './pages/Profile';
@@ -42,6 +44,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-otp" element={<OtpVerification />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 <Route element={<ProtectedRoute allowedRoles={['USER', 'ADMIN']} />}>
                   <Route path="/" element={<Dashboard />} />
