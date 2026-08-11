@@ -89,7 +89,7 @@ const Register = () => {
     <div className="auth-layout" style={{ padding: '2rem 1rem' }}>
       <div className="auth-card animate-fade-in" style={{ maxWidth: '600px' }}>
         <div className="auth-header">
-          <h1 className="auth-logo">Hari Om <span>Enterprises</span></h1>
+          <img className="logo-image" src="/IMG_0600.png" alt="Hari Om Enterprises" />
           <h2 className="auth-title">Create an Account</h2>
           <p className="auth-subtitle">Join us to manage your enterprise</p>
         </div>

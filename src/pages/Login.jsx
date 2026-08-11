@@ -61,7 +61,7 @@ const Login = () => {
     <div className="auth-layout">
       <div className="auth-card animate-fade-in">
         <div className="auth-header">
-          <h1 className="auth-logo">Hari Om <span>Enterprises</span></h1>
+          <img className="logo-image" src="/IMG_0600.png" alt="Hari Om Enterprises" />
           <p className="auth-subtitle">Please sign in to your account</p>
         </div>
 

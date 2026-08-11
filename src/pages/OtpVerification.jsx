@@ -114,7 +114,7 @@ const OtpVerification = () => {
     <div className="auth-layout">
       <div className="auth-card animate-fade-in">
         <div className="auth-header">
-          <h1 className="auth-logo">Hari Om <span>Enterprises</span></h1>
+          <img className="logo-image" src="/IMG_0600.png" alt="Hari Om Enterprises" />
           <h2 className="auth-title">Verify OTP</h2>
           <p className="auth-subtitle">
             An approval OTP has been sent to the Hari Om admin for <strong>{email}</strong>.

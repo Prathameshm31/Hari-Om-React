@@ -33,9 +33,7 @@ const UserLayout = ({ title, subtitle, activeKey, children }) => {
     <div className="dashboard-layout">
       <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
-          <h1 className="auth-logo" style={{ fontSize: '1.25rem' }}>
-            Hari Om <span>Enterprises</span>
-          </h1>
+          <img className="logo-image" src="/IMG_0600.png" alt="Hari Om Enterprises" />
           {mobileMenuOpen && (
             <button
               className="mobile-menu-btn"
