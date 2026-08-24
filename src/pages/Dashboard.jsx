@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCircle2, XCircle, PackageCheck, Users } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, PlusCircle, ShoppingBag, Clock, CheckCircle2, XCircle, PackageCheck, Users, Trophy, Crown } from 'lucide-react';
 import UserLayout from '../components/UserLayout';
 import * as SELF from '../api/self';
 import { fetchMyOrders } from '../api/orders';
@@ -62,6 +62,41 @@ const Dashboard = () => {
   }, [load]);
 
   const ordersList = recentOrders?.content || [];
+
+  const myTeams = useMemo(() => (myTeam?.team ? [myTeam] : []), [myTeam]);
+
+  const maxTeamPoints = useMemo(
+    () => Math.max(1, ...myTeams.map((t) => t.team?.teamPoints || 0)),
+    [myTeams]
+  );
+
+  const topPerformers = useMemo(
+    () =>
+      myTeams.map(({ team, members }) => {
+        if (!team) return null;
+        const list = Array.isArray(members) ? [...members] : [];
+        list.sort((a, b) => {
+          if (!!b.isLeader !== !!a.isLeader) return b.isLeader ? 1 : -1;
+          return new Date(a.joinedDate || 0) - new Date(b.joinedDate || 0);
+        });
+        const m = list[0];
+        return {
+          name: m?.retailerName || team.leaderName || '—',
+          image: m?.profileImageUrl || null,
+          isLeader: !!m?.isLeader,
+          city: m?.city || '',
+          score: team.teamPoints ?? 0,
+          rank: team.rank ?? null,
+          teamName: team.teamName || '—',
+        };
+      }),
+    [myTeams]
+  );
+
+  const topPerformer = useMemo(() => {
+    if (!topPerformers.length) return null;
+    return [...topPerformers].sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+  }, [topPerformers]);
 
   const orderStats = useMemo(() => {
     const stats = { PENDING: 0, APPROVED: 0, REJECTED: 0, DELIVERED: 0, TOTAL: 0 };
@@ -172,6 +207,175 @@ const Dashboard = () => {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>You are not assigned to any team yet.</p>
         )}
       </div>
+
+      <div className="tr-widget rd-panel" style={{ marginTop: '1.5rem' }}>
+        <div className="tr-widget-header">
+          <div className="tr-title">
+            <span className="tr-title-icon" style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}>
+              <Users size={20} />
+            </span>
+            <div>
+              <h3>Team Management</h3>
+              <p>All teams associated with your account</p>
+            </div>
+          </div>
+        </div>
+        {myTeams.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>You are not assigned to any team yet.</p>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Team Name</th>
+                  <th>Total Members</th>
+                  <th>Performance</th>
+                  <th>Rank</th>
+                  <th>Top Performer</th>
+                </tr>
+              </thead>
+              <tbody>
+                {myTeams.map(({ team }, idx) => {
+                  const tp = topPerformers[idx];
+                  return (
+                    <tr key={team.id || team.teamName}>
+                      <td>
+                        <div className="retailer-cell">
+                          <div className="avatar" style={{ background: '#eff6ff', color: 'var(--primary)' }}>
+                            {team.teamName?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <span className="retailer-name">{team.teamName || '—'}</span>
+                        </div>
+                      </td>
+                      <td>{team.totalMembers ?? 0}</td>
+                      <td style={{ minWidth: '140px' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                          <strong>{team.teamPoints ?? 0}</strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>pts</span>
+                        </div>
+                        <div style={{ height: '6px', borderRadius: 999, background: 'var(--border-color)', overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              width: `${Math.min(100, ((team.teamPoints || 0) / maxTeamPoints) * 100)}%`,
+                              height: '100%',
+                              borderRadius: 999,
+                              background: 'linear-gradient(90deg, var(--primary), #60a5fa)',
+                            }}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <span className="points-badge">#{team.rank ?? '—'}</span>
+                      </td>
+                      <td>
+                        {tp ? (
+                          <div className="retailer-cell">
+                            {tp.image ? (
+                              <img
+                                className="avatar"
+                                src={tp.image}
+                                alt={tp.name}
+                                style={{ objectFit: 'cover' }}
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              <div className="avatar" style={{ background: '#fff7ed', color: 'var(--secondary)' }}>
+                                {tp.name?.charAt(0).toUpperCase() || '?'}
+                              </div>
+                            )}
+                            <span className="retailer-name">{tp.name}</span>
+                            {tp.isLeader && <Crown size={13} style={{ color: '#eab308', flexShrink: 0 }} />}
+                          </div>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {topPerformer && (
+        <div className="tr-widget rd-panel" style={{ marginTop: '1.5rem' }}>
+          <div className="tr-widget-header">
+            <div className="tr-title">
+              <span className="tr-title-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
+                <Trophy size={20} />
+              </span>
+              <div>
+                <h3>Top Performer</h3>
+                <p>Highest performing member across your teams</p>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+            {topPerformer.image ? (
+              <img
+                src={topPerformer.image}
+                alt={topPerformer.name}
+                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #fbbf24', flexShrink: 0 }}
+              />
+            ) : (
+              <div
+                className="avatar"
+                style={{
+                  width: 64,
+                  height: 64,
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  background: '#fff7ed',
+                  color: 'var(--secondary)',
+                  border: '3px solid #fbbf24',
+                }}
+              >
+                {topPerformer.name?.charAt(0).toUpperCase() || '?'}
+              </div>
+            )}
+            <div style={{ flex: '1 1 200px', minWidth: '160px' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.15rem' }}>
+                {topPerformer.name}
+                {topPerformer.isLeader && <Crown size={16} style={{ color: '#eab308' }} />}
+              </p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                {topPerformer.city ? `${topPerformer.city} · ` : ''}{topPerformer.teamName}
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Rank</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-main)' }}>#{topPerformer.rank ?? '—'}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Score</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--primary)' }}>{topPerformer.score} pts</p>
+              </div>
+              <div style={{ maxWidth: '180px' }}>
+                <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>Team</p>
+                <p style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{topPerformer.teamName}</p>
+              </div>
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: '50%',
+                  background: '#fef3c7',
+                  color: '#f59e0b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Trophy size={26} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="dashboard-split" style={{ marginTop: '1.5rem' }}>
         <div className="table-card">
