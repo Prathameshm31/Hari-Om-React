@@ -59,11 +59,20 @@
 
 [data-theme="dark"] body {
   background-color: var(--bg-main);
+  background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url('/bg.avif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text-main);
 }
 
 [data-theme="dark"] .auth-layout {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.65)), url('/bg.avif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 [data-theme="dark"] .auth-card {
@@ -79,6 +88,11 @@
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-main);
+  background-image: linear-gradient(rgba(248, 250, 252, 0.7), rgba(248, 250, 252, 0.7)), url('/bg.avif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -133,7 +147,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: linear-gradient(rgba(240, 249, 255, 0.55), rgba(224, 242, 254, 0.55)), url('/bg.avif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: 2rem;
 }
 
@@ -268,7 +286,7 @@ body {
 .dashboard-content {
   padding: 2rem;
   flex: 1;
-  background: var(--bg-main);
+  background: transparent;
 }
 
 .stats-grid {
@@ -428,6 +446,16 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+  body,
+  .auth-layout {
+    background-attachment: scroll;
+    background-size: cover;
+  }
+
+  .admin-stats-grid {
+    display: none;
+  }
+
   .dashboard-layout {
     flex-direction: column;
   }

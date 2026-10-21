@@ -17,7 +17,7 @@ const Card = ({ label, value, icon, cls }) => (
 const DashboardStats = ({ stats, loading }) => {
   if (loading) {
     return (
-      <div className="stats-grid">
+      <div className="stats-grid admin-stats-grid">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div className="stat-card" key={i}>
             <div style={{ flex: 1 }}>
@@ -32,7 +32,7 @@ const DashboardStats = ({ stats, loading }) => {
   }
   const s = stats || {};
   return (
-    <div className="stats-grid">
+    <div className="stats-grid admin-stats-grid">
       <Card label="Pending Order Requests" value={formatNum(s.pendingOrders)} icon={<ShoppingCart size={24} />} cls="secondary" />
       <Card label="Approved Today" value={formatNum(s.approvedToday)} icon={<CheckCircle2 size={24} />} cls="success" />
       <Card label="Rejected Today" value={formatNum(s.rejectedToday)} icon={<XCircle size={24} />} cls="danger" />
